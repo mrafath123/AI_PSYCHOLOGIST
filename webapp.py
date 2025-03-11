@@ -14,8 +14,8 @@ app.secret_key = 'supersecretkey'
 
 bcrypt = Bcrypt(app)
 
-# MongoDB Connection
-client = MongoClient("mongodb+srv://rafath1234:rafath123@cluster0.yjfhw6p.mongodb.net/?retryWrites=true&w=majority")
+# MongoDB Atlas Connection
+client = MongoClient("mongodb+srv://rafath1234:rafath123@cluster0.yjfhw6p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client['EmotionDetection_login']
 users = db['users']
 results_collection = db['emotion_results']
