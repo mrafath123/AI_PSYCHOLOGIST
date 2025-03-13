@@ -2,7 +2,7 @@ Flask==2.2.5
 Flask-Bcrypt==1.0.1
 Flask-Login==0.6.2
 pymongo==4.3.3
-tensorflow==2.12.0
+tensorflow-cpu
 keras==2.12.0
 numpy==1.23.5
 opencv-python==4.8.0.76

@@ -9,6 +9,10 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from pymongo import MongoClient
 from transformers import pipeline
 from datetime import datetime
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
