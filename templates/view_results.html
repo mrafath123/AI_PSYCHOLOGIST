@@ -11,38 +11,35 @@
             font-family: 'Poppins', sans-serif;
             color: white;
         }
-        .navbar {
-            background: rgba(0, 0, 0, 0.8);
-        }
-        .container-box {
+        .container {
+            margin-top: 50px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            background: rgba(255, 255, 255, 0.1);
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
-            overflow: hidden;
         }
         th, td {
-            padding: 15px;
-            border: 1px solid white;
-            text-align: center;
+            padding: 10px;
             color: white;
         }
         th {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark py-3">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a href="/" class="navbar-brand"><h2>Multimodal Analysis</h2></a>
+            <a class="navbar-brand" href="#"><h2>Multimodal Analysis</h2></a>
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a href="{{ url_for('base') }}" class="nav-link">Dashboard</a></li>
@@ -52,30 +49,30 @@
         </div>
     </nav>
 
-    <div class="container mt-5">
+    <div class="container">
         <h1 class="text-center">Saved Emotion Analysis Results</h1>
-        <div class="container-box mt-4">
-            <table>
-                <tr>
-                    <th>Video Emotion</th>
-                    <th>Video Score</th>
-                    <th>Audio Emotion</th>
-                    <th>Audio Score</th>
-                    <th>Overall Sentiment</th>
-                    <th>Description</th>
-                </tr>
-                {% for result in results %}
-                <tr>
-                    <td>{{ result.video_emotion }}</td>
-                    <td>{{ result.video_score }}</td>
-                    <td>{{ result.audio_emotion }}</td>
-                    <td>{{ result.audio_score }}</td>
-                    <td>{{ result.overall_sentiment }}</td>
-                    <td>{{ result.description }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
+        <table class="table table-bordered mt-3">
+            <tr>
+                <th>Date & Time</th>
+                <th>Video Emotion</th>
+                <th>Video Score</th>
+                <th>Audio Emotion</th>
+                <th>Audio Score</th>
+                <th>Overall Sentiment</th>
+                <th>Description</th>
+            </tr>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.timestamp }}</td>
+                <td>{{ result.video_emotion }}</td>
+                <td>{{ result.video_score }}</td>
+                <td>{{ result.audio_emotion }}</td>
+                <td>{{ result.audio_score }}</td>
+                <td>{{ result.overall_sentiment }}</td>
+                <td>{{ result.description }}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 </body>
 </html>
