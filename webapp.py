@@ -9,10 +9,6 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from pymongo import MongoClient
 from transformers import pipeline
 from datetime import datetime
-import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -23,7 +19,7 @@ bcrypt = Bcrypt(app)
 client = MongoClient("mongodb+srv://<username>:<password>@cluster0.yjfhw6p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client['EmotionDetection_login']
 users = db['users']
-results_collection = db['emotion_results']
+results_collection = db['emotion_result']
 
 login_manager = LoginManager()
 login_manager.init_app(app)
