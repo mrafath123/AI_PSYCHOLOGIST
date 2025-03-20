@@ -33,6 +33,19 @@
             font-size: 20px;
             margin-top: 10px;
         }
+        .btn-restart {
+            background-color: #9c27b0;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 30px;
+            transition: 0.3s ease-in-out;
+            margin-top: 10px;
+        }
+        .btn-restart:hover {
+            background-color: #6a11cb;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -47,17 +60,18 @@
             </div>
         </div>
     </nav>
-
     <div class="container">
         <h1>Snake Game - Stress Relief</h1>
         <p>Control the snake with arrow keys. Avoid hitting the walls or yourself!</p>
         <p class="timer">Time Left: <span id="timer">15:00</span></p>
         <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <button id="restartGame" class="btn-restart">Restart Game</button>
     </div>
 
     <script>
         let timer = 900;  // 15 minutes in seconds
         const timerDisplay = document.getElementById("timer");
+        const restartBtn = document.getElementById("restartGame");
 
         function updateTimer() {
             let minutes = Math.floor(timer / 60);
@@ -76,9 +90,14 @@
         const ctx = canvas.getContext("2d");
 
         const box = 20;
-        let snake = [{x: 200, y: 200}];
-        let direction = "RIGHT";
-        let food = {x: Math.floor(Math.random() * 20) * box, y: Math.floor(Math.random() * 20) * box};
+        let snake, direction, food;
+        
+        function initGame() {
+            snake = [{x: 200, y: 200}];
+            direction = "RIGHT";
+            food = {x: Math.floor(Math.random() * 20) * box, y: Math.floor(Math.random() * 20) * box};
+            gameLoop = setInterval(updateGame, 150);
+        }
 
         function draw() {
             ctx.fillStyle = "#fff";
@@ -91,7 +110,7 @@
             ctx.fillRect(food.x, food.y, box, box);
         }
 
-        function updateSnake() {
+        function updateGame() {
             let head = {x: snake[0].x, y: snake[0].y};
 
             if (direction === "UP") head.y -= box;
@@ -101,15 +120,17 @@
 
             // Check for collision with walls
             if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-                alert("Game Over! You hit the wall.");
-                window.location.href = "/base";
+                alert("Game Over! You hit the wall. Press Restart to play again.");
+                clearInterval(gameLoop);
+                return;
             }
 
             // Check for collision with itself
-            for (let i = 0; i < snake.length; i++) {
+            for (let i = 1; i < snake.length; i++) {
                 if (head.x === snake[i].x && head.y === snake[i].y) {
-                    alert("Game Over! You hit yourself.");
-                    window.location.href = "/base";
+                    alert("Game Over! You hit yourself. Press Restart to play again.");
+                    clearInterval(gameLoop);
+                    return;
                 }
             }
 
@@ -121,6 +142,7 @@
             }
 
             snake.unshift(head);
+            draw();
         }
 
         function changeDirection(event) {
@@ -131,13 +153,13 @@
             if (key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
         }
 
-        function gameLoop() {
-            updateSnake();
-            draw();
-        }
-
         document.addEventListener("keydown", changeDirection);
-        setInterval(gameLoop, 150);
+        restartBtn.addEventListener("click", function() {
+            clearInterval(gameLoop);
+            initGame();  // Restart the game
+        });
+
+        initGame();  // Start game when page loads
     </script>
 </body>
 </html>
