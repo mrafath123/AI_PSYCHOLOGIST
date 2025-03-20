@@ -9,6 +9,8 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from pymongo import MongoClient
 from transformers import pipeline
 from datetime import datetime
+from flask import session
+import time
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -16,7 +18,7 @@ app.secret_key = 'supersecretkey'
 bcrypt = Bcrypt(app)
 
 # MongoDB Atlas Connection
-client = MongoClient("mongodb+srv://<username>:<password>@cluster0.yjfhw6p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+client = MongoClient("mongodb+srv://rafath1234:rafath123@cluster0.yjfhw6p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client['EmotionDetection_login']
 users = db['users']
 results_collection = db['emotion_result']
@@ -95,6 +97,20 @@ def realtime():
 @login_required
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/play_game')
+@login_required
+def play_game():
+    # Check if the user has played in the last 2 hours
+    last_play_time = session.get("last_play_time", 0)
+    current_time = time.time()
+    
+    if current_time - last_play_time < 7200:  # 2 hours in seconds
+        return render_template("cooldown.html", remaining_time=int(7200 - (current_time - last_play_time)))
+
+    # Update last play time
+    session["last_play_time"] = current_time
+    return render_template("gamified.html")
 
 @app.route('/view_results')
 @login_required
