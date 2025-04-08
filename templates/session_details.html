@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+        .container {
+            margin-top: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: rgba(255, 255, 255, 0.2);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .bot-message {
+            background: rgba(0, 0, 0, 0.3);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        .analysis-result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><h2>Multimodal Analysis</h2></a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a href="{{ url_for('base') }}" class="nav-link">Dashboard</a></li>
+                    <li class="nav-item"><a href="{{ url_for('logout') }}" class="nav-link">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center mb-4">Session Details</h1>
+        <p class="text-center mb-4">Date: {{ session.timestamp }}</p>
+        
+        <div class="analysis-result">
+            <h3 class="text-center">Analysis Results</h3>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h4>Video Analysis</h4>
+                    <p>Emotion: {{ session.video_emotion }}</p>
+                    <p>Score: {{ session.video_score }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h4>Audio/Text Analysis</h4>
+                    <p>Emotion: {{ session.audio_emotion }}</p>
+                    <p>Score: {{ session.audio_score }}</p>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <h4>Overall Sentiment: {{ session.overall_sentiment }}</h4>
+                <p>{{ session.description }}</p>
+            </div>
+        </div>
+        
+        <h3 class="text-center mb-3">Conversation History</h3>
+        <div class="chat-container" id="chat-container">
+            {% if session.chat_history %}
+                {% for message in session.chat_history %}
+                    <div class="message {% if message.sender == 'user' %}user-message{% else %}bot-message{% endif %}">
+                        {{ message.text }}
+                        {% if message.audio_response %}
+                            <audio controls class="audio-player">
+                                <source src="{{ message.audio_response }}" type="audio/mp3">
+                            </audio>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">No conversation history available for this session.</p>
+            {% endif %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('view_results') }}" class="btn btn-primary">Back to Results</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

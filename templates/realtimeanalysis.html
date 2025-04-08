@@ -1,4 +1,4 @@
-<!-- Updated realtimeanalysis.html to correctly display real-time emotions and fix UI issues -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real-Time Multimodal Emotion Analysis</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             background: linear-gradient(135deg, #6a11cb, #2575fc);
@@ -23,10 +24,133 @@
             text-align: center;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease-in-out;
+            margin-bottom: 20px;
         }
-        .result-box:hover {
-            transform: scale(1.05);
+        .chat-container {
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
         }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: rgba(255, 255, 255, 0.2);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .bot-message {
+            background: rgba(0, 0, 0, 0.3);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        .recording-btn {
+            background: #ff4f7b;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .recording-btn.recording {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .therapy-content {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .history-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .progress-container {
+            display: none;
+            margin-top: 10px;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: -0.125em;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+        @keyframes spinner-border {
+            100% { transform: rotate(360deg); }
+        }
+        .badge.happy { background-color: #28a745; }
+        .badge.neutral { background-color: #6c757d; }
+        .badge.sad { background-color: #dc3545; }
+        .badge.angry { background-color: #fd7e14; }
+        .badge.fear { background-color: #6f42c1; }
+        .badge.disgust { background-color: #20c997; }
+        .badge.surprise { background-color: #ffc107; color: #000; }
+        .badge.unknown { background-color: #6c757d; }
+        
+        /* Session Control Styles */
+        #session-control-btn {
+            z-index: 1000;
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        #sessionModal .modal-content {
+            background: rgba(40, 40, 40, 0.95);
+            border: 1px solid #666;
+        }
+        
+        #session-timer {
+            font-family: monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        /* Emotion color indicators */
+        .emotion-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .happy-indicator { background-color: #28a745; }
+        .neutral-indicator { background-color: #6c757d; }
+        .sad-indicator { background-color: #dc3545; }
+        .angry-indicator { background-color: #fd7e14; }
+        .fear-indicator { background-color: #6f42c1; }
+        .disgust-indicator { background-color: #20c997; }
+        .surprise-indicator { background-color: #ffc107; }
     </style>
 </head>
 <body>
@@ -44,6 +168,7 @@
 
     <div class="container mt-5">
         <h1 class="text-center">Real-Time Multimodal Emotion Analysis</h1>
+        
         <div class="row mt-4">
             <div class="col-md-6 text-center result-box">
                 <h2>Visual Emotion Analysis</h2>
@@ -51,50 +176,651 @@
                 <h3 id="video-emotion">Emotion: Detecting...</h3>
                 <h4 id="video-score">Score: --</h4>
             </div>
+            
             <div class="col-md-6 text-center result-box">
-                <h2>Audio Sentiment Analysis</h2>
-                <h4 id="audio-text">Text: Listening...</h4>
-                <h4 id="audio-emotion">Emotion: --</h4>
-                <h4 id="audio-score">Score: --</h4>
+                <h2>Text & Audio Analysis</h2>
+                <div class="chat-container" id="chat-container">
+                    <div class="message bot-message">Hello! How are you feeling today? You can type or record your message.</div>
+                </div>
+                
+                <div class="input-group mb-3">
+                    <input type="text" id="user-input" class="form-control" placeholder="Type your message...">
+                    <button class="btn btn-primary" id="send-btn">Send</button>
+                </div>
+                
+                <div class="text-center">
+                    <button id="record-btn" class="recording-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <div id="recording-timer" class="mt-2">00:00</div>
+                    <div class="progress-container" id="progress-container">
+                        <div class="progress">
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <button id="send-audio-btn" class="btn btn-sm btn-success mt-2">Send Audio</button>
+                    </div>
+                </div>
+                
+                <div id="audio-analysis-result" class="mt-3">
+                    <h4 id="audio-emotion">Emotion: --</h4>
+                    <h4 id="audio-score">Score: --</h4>
+                    <audio controls class="audio-player" id="audio-response"></audio>
+                </div>
             </div>
         </div>
-        <div class="text-center mt-5 result-box">
-            <h2>Overall Sentiment</h2>
-            <h3 id="overall-sentiment">Sentiment: --</h3>
-            <h4 id="emotion-state">Emotion State: --</h4>
-            <h4 id="description">Description: --</h4>
-            <button id="save-button" class="btn btn-primary mt-3">Save Results</button>
+        
+        <div class="text-center mt-4 result-box">
+            <h2>Overall Sentiment Analysis</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <h4>Video Analysis</h4>
+                    <p id="overall-video-emotion">Emotion: --</p>
+                    <p id="overall-video-score">Score: --</p>
+                </div>
+                <div class="col-md-4">
+                    <h4>Audio/Text Analysis</h4>
+                    <p id="overall-audio-emotion">Emotion: --</p>
+                    <p id="overall-audio-score">Score: --</p>
+                </div>
+                <div class="col-md-4">
+                    <h4>Combined Result</h4>
+                    <h3 id="overall-sentiment">Sentiment: --</h3>
+                    <p id="emotion-state">Emotion State: --</p>
+                </div>
+            </div>
+            <div id="description-container" class="mt-3">
+                <h4>Description</h4>
+                <p id="description">--</p>
+            </div>
+            
+            <div id="therapy-content" class="therapy-content" style="display: none;">
+                <h4>Recommended Content</h4>
+                <div id="video-therapy" class="mb-3">
+                    <h5>Video Therapy</h5>
+                    <div class="ratio ratio-16x9">
+                        <iframe id="therapy-video" src="" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <div id="audio-therapy">
+                    <h5>Audio Therapy</h5>
+                    <audio controls class="audio-player" id="therapy-audio"></audio>
+                </div>
+                <p id="therapy-message" class="mt-3"></p>
+                <button id="skip-therapy" class="btn btn-sm btn-warning">Skip Recommendations</button>
+            </div>
+        </div>
+        
+        <div class="history-dashboard mt-4 result-box">
+            <h2>Session History</h2>
+            <div id="history-items">
+                <div class="text-center py-3">
+                    <span class="loading-spinner"></span> Loading session history...
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        setInterval(async () => {
-            const response = await fetch('/get_emotion');
-            const data = await response.json();
-            
-            document.getElementById("video-emotion").innerText = `Emotion: ${data.video_emotion}`;
-            document.getElementById("video-score").innerText = `Score: ${data.video_score}`;
-            document.getElementById("audio-emotion").innerText = `Emotion: ${data.audio_emotion}`;
-            document.getElementById("audio-score").innerText = `Score: ${data.audio_score}`;
-            document.getElementById("overall-sentiment").innerText = `Sentiment: ${data.overall_sentiment}`;
-            document.getElementById("emotion-state").innerText = `Emotion State: ${data.emotion_state}`;
-            document.getElementById("description").innerText = `Description: ${data.description}`;
-        }, 5000);
-
-        document.getElementById("save-button").addEventListener("click", async () => {
-            const response = await fetch('/get_emotion');
-            const data = await response.json();
-
-            const saveResponse = await fetch('/save_result', {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
-
-            const saveData = await saveResponse.json();
-            alert(saveData.message);
-            window.location.href = "{{ url_for('view_results') }}";
-        });
-    </script>
-</body>
-</html>
+    <-- Session Control Modal
+    <div class="modal fade" id="sessionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+              <h5 class="modal-title">Session Control</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Current session duration: <span id="session-timer">00:00:00</span></p>
+              <div class="progress mt-2">
+                <div id="session-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button id="end-session-btn" class="btn btn-danger">End Session Now</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Session Control Button -->
+      <button id="session-control-btn" class="btn btn-info position-fixed" style="bottom: 20px; right: 20px; display: none;">
+        <i class="fas fa-stopwatch"></i> Session Control
+      </button>
+  
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+          // Global variables
+          let mediaRecorder;
+          let audioChunks = [];
+          let recordingInterval;
+          let seconds = 0;
+          let therapyCheckInterval;
+          
+          // Session timeout variables
+          let sessionStartTime = new Date();
+          let sessionTimeout = 10 * 60 * 1000; // 10 minutes in ms
+          let sessionTimerInterval;
+          let sessionProgressInterval;
+          
+          // DOM elements
+          const chatContainer = document.getElementById('chat-container');
+          const userInput = document.getElementById('user-input');
+          const sendBtn = document.getElementById('send-btn');
+          const recordBtn = document.getElementById('record-btn');
+          const recordingTimer = document.getElementById('recording-timer');
+          const progressContainer = document.getElementById('progress-container');
+          const progressBar = document.getElementById('progress-bar');
+          const sendAudioBtn = document.getElementById('send-audio-btn');
+          const audioResponse = document.getElementById('audio-response');
+          const therapyContent = document.getElementById('therapy-content');
+          const therapyVideo = document.getElementById('therapy-video');
+          const therapyAudio = document.getElementById('therapy-audio');
+          const therapyMessage = document.getElementById('therapy-message');
+          const historyItems = document.getElementById('history-items');
+          const skipTherapyBtn = document.getElementById('skip-therapy');
+          
+          // Initialize session timer
+          function initSessionTimer() {
+              // Update timer every second
+              sessionTimerInterval = setInterval(updateSessionTimer, 1000);
+              
+              // Update progress bar more frequently for smoother animation
+              sessionProgressInterval = setInterval(updateSessionProgress, 100);
+              
+              // Show session control button
+              document.getElementById('session-control-btn').style.display = 'block';
+          }
+          
+          // Update session timer display
+          function updateSessionTimer() {
+              const elapsed = new Date() - sessionStartTime;
+              const remaining = Math.max(0, sessionTimeout - elapsed);
+              
+              const hours = Math.floor(remaining / (1000 * 60 * 60)).toString().padStart(2, '0');
+              const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+              const secs = Math.floor((remaining % (60000)) / 1000).toString().padStart(2, '0');
+              
+              document.getElementById('session-timer').textContent = `${hours}:${mins}:${secs}`;
+              
+              // Auto-end session when time is up
+              if (remaining <= 0) {
+                  endSession(false);
+              }
+          }
+          
+          // Update session progress bar
+          function updateSessionProgress() {
+              const elapsed = new Date() - sessionStartTime;
+              const progressPercent = Math.min(100, (elapsed / sessionTimeout) * 100);
+              document.getElementById('session-progress').style.width = `${progressPercent}%`;
+              
+              // Change color based on progress
+              const progressBar = document.getElementById('session-progress');
+              if (progressPercent < 50) {
+                  progressBar.className = 'progress-bar bg-success';
+              } else if (progressPercent < 80) {
+                  progressBar.className = 'progress-bar bg-warning';
+              } else {
+                  progressBar.className = 'progress-bar bg-danger';
+              }
+          }
+          
+          // End session function
+          async function endSession(manual = true) {
+              clearInterval(sessionTimerInterval);
+              clearInterval(sessionProgressInterval);
+              
+              // Calculate session duration in minutes
+              const duration = (new Date() - sessionStartTime) / (1000 * 60);
+              
+              try {
+                  // Get current analysis data
+                  const response = await fetch('/get_emotion');
+                  if (!response.ok) throw new Error('Failed to get current analysis');
+                  const data = await response.json();
+                  
+                  // Add session metadata
+                  data.session_duration = duration.toFixed(2);
+                  data.session_ended_manually = manual;
+                  data.timestamp = new Date().toISOString();
+                  
+                  // Save final session data
+                  const saveResponse = await fetch('/save_result', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(data)
+                  });
+                  
+                  if (!saveResponse.ok) throw new Error('Failed to save session');
+                  
+                  // Show confirmation
+                  if (manual) {
+                      alert('Session ended successfully. Data saved.');
+                  }
+                  
+                  // Reset UI
+                  document.getElementById('session-control-btn').style.display = 'none';
+                  $('#sessionModal').modal('hide');
+                  
+                  // Refresh history
+                  updateHistoryDashboard();
+                  
+              } catch (error) {
+                  console.error('Error ending session:', error);
+                  alert('Error ending session: ' + error.message);
+              }
+          }
+          
+          // Event listeners for session control
+          document.getElementById('session-control-btn').addEventListener('click', () => {
+              $('#sessionModal').modal('show');
+          });
+  
+          document.getElementById('end-session-btn').addEventListener('click', () => {
+              if (confirm('Are you sure you want to end this session?')) {
+                  endSession(true);
+              }
+          });
+          
+          // Skip therapy button
+          skipTherapyBtn.addEventListener('click', () => {
+              therapyContent.style.display = 'none';
+          });
+          
+          // Event Listeners
+          sendBtn.addEventListener('click', sendTextMessage);
+          userInput.addEventListener('keypress', (e) => {
+              if (e.key === 'Enter') sendTextMessage();
+          });
+          
+          recordBtn.addEventListener('click', toggleRecording);
+          sendAudioBtn.addEventListener('click', sendAudioMessage);
+          
+          // Initialize with empty history
+          updateHistoryDashboard();
+          
+          // Initialize session timer when page loads
+          document.addEventListener('DOMContentLoaded', function() {
+              initSessionTimer();
+          });
+          
+          // Function to send text message
+          async function sendTextMessage() {
+              const message = userInput.value.trim();
+              if (!message) return;
+              
+              // Add user message to chat
+              addMessageToChat(message, 'user');
+              userInput.value = '';
+              
+              // Show typing indicator
+              const typingIndicator = addMessageToChat('Analyzing your message...', 'bot');
+              
+              // Send message to server for analysis
+              try {
+                  const response = await fetch('/analyze_text', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ text: message })
+                  });
+                  
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  
+                  const data = await response.json();
+                  
+                  // Remove typing indicator
+                  chatContainer.removeChild(typingIndicator);
+                  
+                  // Add analysis result to chat
+                  addMessageToChat(`Analysis Result: ${data.emotion} (Score: ${data.score})`, 'bot');
+                  
+                  // Update audio analysis section
+                  updateEmotionDisplay('audio-emotion', data.emotion);
+                  document.getElementById('audio-score').textContent = `Score: ${data.score}`;
+                  
+                  // If audio response is available, play it
+                  if (data.audio_response) {
+                      audioResponse.src = data.audio_response;
+                  }
+                  
+                  // Update overall analysis
+                  updateOverallAnalysis();
+                  
+              } catch (error) {
+                  console.error('Error:', error);
+                  chatContainer.removeChild(typingIndicator);
+                  addMessageToChat('Sorry, there was an error analyzing your message.', 'bot');
+              }
+          }
+          
+          // Function to update emotion display with color indicator
+          function updateEmotionDisplay(elementId, emotion) {
+              const element = document.getElementById(elementId);
+              const emotionClass = emotion.toLowerCase() + '-indicator';
+              
+              // Remove any existing emotion classes
+              element.className = element.className.replace(/(^|\s)\S+-indicator(\s|$)/g, ' ');
+              
+              // Add the new emotion class
+              element.innerHTML = `<span class="emotion-indicator ${emotionClass}"></span> Emotion: ${emotion}`;
+          }
+          
+          // Function to toggle audio recording
+          async function toggleRecording() {
+              if (mediaRecorder && mediaRecorder.state === 'recording') {
+                  stopRecording();
+              } else {
+                  await startRecording();
+              }
+          }
+          
+          // Function to start audio recording
+          async function startRecording() {
+              try {
+                  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                  mediaRecorder = new MediaRecorder(stream);
+                  audioChunks = [];
+                  
+                  mediaRecorder.ondataavailable = (e) => {
+                      if (e.data.size > 0) audioChunks.push(e.data);
+                  };
+                  
+                  mediaRecorder.onstop = () => {
+                      const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                      // Enable send audio button
+                      sendAudioBtn.disabled = false;
+                  };
+                  
+                  mediaRecorder.start();
+                  recordBtn.classList.add('recording');
+                  recordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                  
+                  // Start timer
+                  seconds = 0;
+                  recordingInterval = setInterval(() => {
+                      seconds++;
+                      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                      const secs = (seconds % 60).toString().padStart(2, '0');
+                      recordingTimer.textContent = `${mins}:${secs}`;
+                      
+                      // Update progress bar (max 1 minute recording)
+                      const progress = Math.min((seconds / 60) * 100, 100);
+                      progressBar.style.width = `${progress}%`;
+                      
+                      // Stop at 1 minute
+                      if (seconds >= 60) {
+                          stopRecording();
+                      }
+                  }, 1000);
+                  
+                  // Show progress container
+                  progressContainer.style.display = 'block';
+                  sendAudioBtn.disabled = true;
+                  
+              } catch (error) {
+                  console.error('Error accessing microphone:', error);
+                  addMessageToChat('Microphone access denied. Please allow microphone access to record audio.', 'bot');
+              }
+          }
+          
+          // Function to stop audio recording
+          function stopRecording() {
+              if (mediaRecorder && mediaRecorder.state === 'recording') {
+                  mediaRecorder.stop();
+                  clearInterval(recordingInterval);
+                  recordBtn.classList.remove('recording');
+                  recordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                  
+                  // Stop all tracks
+                  mediaRecorder.stream.getTracks().forEach(track => track.stop());
+              }
+          }
+          
+          // Function to send audio message
+          async function sendAudioMessage() {
+              if (audioChunks.length === 0) return;
+              
+              const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+              const formData = new FormData();
+              formData.append('audio', audioBlob, 'recording.wav');
+              
+              // Add user message to chat
+              addMessageToChat('Audio message recorded', 'user');
+              
+              // Show analyzing indicator
+              const typingIndicator = addMessageToChat('Analyzing your audio...', 'bot');
+              
+              try {
+                  const response = await fetch('/analyze_audio', {
+                      method: 'POST',
+                      body: formData
+                  });
+                  
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  
+                  const data = await response.json();
+                  
+                  // Remove typing indicator
+                  chatContainer.removeChild(typingIndicator);
+                  
+                  // Add analysis result to chat
+                  addMessageToChat(`Analysis Result: ${data.emotion} (Score: ${data.score})`, 'bot');
+                  
+                  // Update audio analysis section
+                  updateEmotionDisplay('audio-emotion', data.emotion);
+                  document.getElementById('audio-score').textContent = `Score: ${data.score}`;
+                  
+                  // If audio response is available, play it
+                  if (data.audio_response) {
+                      audioResponse.src = data.audio_response;
+                  }
+                  
+                  // Update overall analysis
+                  updateOverallAnalysis();
+                  
+                  // Reset recording UI
+                  progressContainer.style.display = 'none';
+                  recordingTimer.textContent = '00:00';
+                  progressBar.style.width = '0%';
+                  audioChunks = [];
+                  
+              } catch (error) {
+                  console.error('Error:', error);
+                  chatContainer.removeChild(typingIndicator);
+                  addMessageToChat('Sorry, there was an error analyzing your audio.', 'bot');
+              }
+          }
+          
+          // Function to add message to chat
+          function addMessageToChat(message, sender) {
+              const messageDiv = document.createElement('div');
+              messageDiv.classList.add('message');
+              messageDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+              messageDiv.textContent = message;
+              chatContainer.appendChild(messageDiv);
+              chatContainer.scrollTop = chatContainer.scrollHeight;
+              return messageDiv;
+          }
+          
+          // Function to update overall analysis
+          async function updateOverallAnalysis() {
+              try {
+                  const response = await fetch('/get_emotion');
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  const data = await response.json();
+                  
+                  // Update video analysis
+                  updateEmotionDisplay('video-emotion', data.video_emotion);
+                  document.getElementById('video-score').textContent = `Score: ${data.video_score || '--'}`;
+                  updateEmotionDisplay('overall-video-emotion', data.video_emotion);
+                  document.getElementById('overall-video-score').textContent = `Score: ${data.video_score || '--'}`;
+                  
+                  // Update audio analysis
+                  updateEmotionDisplay('overall-audio-emotion', data.audio_emotion);
+                  document.getElementById('overall-audio-score').textContent = `Score: ${data.audio_score || '--'}`;
+                  
+                  // Update overall sentiment
+                  const overallSentiment = data.overall_sentiment || 'Unknown';
+                  updateEmotionDisplay('overall-sentiment', overallSentiment);
+                  updateEmotionDisplay('emotion-state', overallSentiment);
+                  document.getElementById('description').textContent = data.description || 'No description available';
+                  
+                  // Check if therapy content should be shown
+                  if (data.show_therapy) {
+                      therapyContent.style.display = 'block';
+                      
+                      // Update video therapy if available
+                      if (data.therapy_video) {
+                          document.getElementById('video-therapy').style.display = 'block';
+                          therapyVideo.src = data.therapy_video;
+                      } else {
+                          document.getElementById('video-therapy').style.display = 'none';
+                      }
+                      
+                      // Update audio therapy if available
+                      if (data.therapy_audio) {
+                          document.getElementById('audio-therapy').style.display = 'block';
+                          therapyAudio.src = data.therapy_audio;
+                      } else {
+                          document.getElementById('audio-therapy').style.display = 'none';
+                      }
+                      
+                      therapyMessage.textContent = data.therapy_message || '';
+                      
+                      // Start monitoring therapy engagement
+                      startTherapyMonitoring();
+                  } else {
+                      therapyContent.style.display = 'none';
+                  }
+                  
+                  // Update history dashboard
+                  await updateHistoryDashboard();
+                  
+                  // Auto-save results
+                  await saveResults();
+                  
+              } catch (error) {
+                  console.error('Error updating overall analysis:', error);
+              }
+          }
+          
+          // Function to start therapy monitoring
+          function startTherapyMonitoring() {
+              clearInterval(therapyCheckInterval);
+              
+              therapyCheckInterval = setInterval(() => {
+                  const videoEngaged = therapyVideo.src && !therapyVideo.paused;
+                  const audioEngaged = therapyAudio.src && !therapyAudio.paused;
+                  
+                  if (!videoEngaged && !audioEngaged) {
+                      if (confirm("You haven't started the recommended therapy content. Would you like to consult with a professional?")) {
+                          window.open("https://mentalhealth.org/find-help", "_blank");
+                      }
+                      clearInterval(therapyCheckInterval);
+                  } else {
+                      // Notify server that user engaged with therapy
+                      fetch('/therapy_engaged', { method: 'POST' })
+                          .catch(err => console.error('Error notifying therapy engagement:', err));
+                  }
+              }, 30000);
+          }
+          
+          // Function to save results
+          async function saveResults() {
+              try {
+                  const response = await fetch('/get_emotion');
+                  if (!response.ok) {
+                      throw new Error('Failed to get emotion data');
+                  }
+                  
+                  const data = await response.json();
+                  
+                  const saveResponse = await fetch('/save_result', {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(data),
+                  });
+                  
+                  if (!saveResponse.ok) {
+                      throw new Error('Failed to save results');
+                  }
+                  
+              } catch (error) {
+                  console.error('Error saving results:', error);
+              }
+          }
+          
+          // Function to update history dashboard
+          async function updateHistoryDashboard() {
+              try {
+                  const response = await fetch('/get_history');
+                  if (!response.ok) {
+                      throw new Error('Failed to fetch history');
+                  }
+                  const history = await response.json();
+                  
+                  const historyContainer = document.getElementById('history-items');
+                  historyContainer.innerHTML = '';
+                  
+                  if (!history || history.length === 0) {
+                      historyContainer.innerHTML = '<p class="text-center">No previous sessions found.</p>';
+                      return;
+                  }
+                  
+                  history.forEach((session, index) => {
+                      const historyItem = document.createElement('div');
+                      historyItem.className = 'history-item';
+                      
+                      // Safely handle missing data
+                      const sentiment = session.overall_sentiment ? session.overall_sentiment.toLowerCase() : 'unknown';
+                      const displaySentiment = session.overall_sentiment || 'Unknown';
+                      const description = session.description || 'No description available';
+                      const duration = session.session_duration ? parseFloat(session.session_duration).toFixed(2) + ' mins' : 'N/A';
+                      const endedManually = session.session_ended_manually ? 'Manually ended' : 'Auto-ended';
+                      
+                      // Determine badge class
+                      let badgeClass = 'bg-primary';
+                      if (sentiment === 'happy') badgeClass = 'bg-success';
+                      else if (sentiment === 'neutral') badgeClass = 'bg-secondary';
+                      else if (['sad','angry','fear','disgust'].includes(sentiment)) badgeClass = 'bg-danger';
+                      
+                      historyItem.innerHTML = `
+                          <h5>Session ${history.length - index}</h5>
+                          <p>Date: ${session.timestamp}</p>
+                          <p>Duration: ${duration} (${endedManually})</p>
+                          <p>Overall Sentiment: 
+                              <span class="badge ${badgeClass}">
+                                  ${displaySentiment}
+                              </span>
+                          </p>
+                          <p>${description}</p>
+                      `;
+                      
+                      historyItem.addEventListener('click', () => {
+                          if (session._id) {
+                              window.location.href = `/session_details/${session._id}`;
+                          }
+                      });
+                      
+                      historyContainer.appendChild(historyItem);
+                  });
+                  
+              } catch (error) {
+                  console.error('Error fetching history:', error);
+                  document.getElementById('history-items').innerHTML = '<p class="text-center">Error loading session history.</p>';
+              }
+          }
+          
+          // Periodically update the analysis
+          setInterval(updateOverallAnalysis, 5000);
+      </script>
+  </body>
+  </html>

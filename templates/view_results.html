@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saved Emotion Analysis Results</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
             background: linear-gradient(135deg, #6a11cb, #2575fc);
@@ -14,8 +15,8 @@
         .container {
             margin-top: 50px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
+            padding: 30px;
+            border-radius: 15px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
         }
         table {
@@ -25,14 +26,38 @@
             border-radius: 10px;
         }
         th, td {
-            padding: 10px;
+            padding: 12px;
             color: white;
+            vertical-align: middle;
         }
         th {
             background: rgba(0, 0, 0, 0.4);
         }
+        .sentiment-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .happy { background-color: #28a745; }
+        .neutral { background-color: #6c757d; }
+        .sad { background-color: #dc3545; }
+        .angry { background-color: #fd7e14; }
+        .fear { background-color: #6f42c1; }
+        .disgust { background-color: #20c997; }
+        .surprise { background-color: #ffc107; color: #000; }
+        .unknown { background-color: #6c757d; }
+        .description-cell {
+            max-width: 300px;
+            white-space: normal;
+            word-wrap: break-word;
+            text-align: left;
+        }
         .navbar {
             background: rgba(0, 0, 0, 0.8);
+        }
+        .session-duration {
+            font-size: 0.9em;
+            color: #ccc;
         }
     </style>
 </head>
@@ -50,29 +75,55 @@
     </nav>
 
     <div class="container">
-        <h1 class="text-center">Saved Emotion Analysis Results</h1>
-        <table class="table table-bordered mt-3">
-            <tr>
-                <th>Date & Time</th>
-                <th>Video Emotion</th>
-                <th>Video Score</th>
-                <th>Audio Emotion</th>
-                <th>Audio Score</th>
-                <th>Overall Sentiment</th>
-                <th>Description</th>
-            </tr>
-            {% for result in results %}
-            <tr>
-                <td>{{ result.timestamp }}</td>
-                <td>{{ result.video_emotion }}</td>
-                <td>{{ result.video_score }}</td>
-                <td>{{ result.audio_emotion }}</td>
-                <td>{{ result.audio_score }}</td>
-                <td>{{ result.overall_sentiment }}</td>
-                <td>{{ result.description }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+        <h1 class="text-center mb-4">Saved Emotion Analysis Results</h1>
+        
+        {% if results %}
+        <div class="table-responsive">
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Duration</th>
+                        <th>Overall Sentiment</th>
+                        <th>Description</th> 
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.timestamp }}</td>
+                        <td>
+                            <span class="session-duration">
+                                {{ "%.2f mins"|format(result.session_duration|float) if result.session_duration else "N/A" }}
+                                <br>
+                                ({{ "Manual" if result.session_ended_manually else "Auto" }})
+                            </span>
+                        </td> 
+                        <td>
+                            {% set sentiment = (result.overall_sentiment or 'unknown')|lower %}
+                            <span class="sentiment-badge {{ sentiment }}">
+                                {{ result.overall_sentiment or 'Unknown' }}
+                            </span>
+                        </td> 
+                        <td class="description-cell">{{ result.description }}</td>
+                        <td>
+                            <a href="/session_details/{{ result._id }}" class="btn btn-sm btn-primary">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            No analysis results found. <a href="{{ url_for('base') }}">Start a new analysis</a>.
+        </div>
+        {% endif %}
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
