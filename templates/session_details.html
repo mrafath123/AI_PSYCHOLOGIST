@@ -73,6 +73,13 @@
         .back-button {
             margin-top: 20px;
         }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+        }
+        .card-title {
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -106,7 +113,7 @@
             <h3 class="text-center mb-4">Analysis Results</h3>
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card bg-transparent border-0">
+                    <div class="card">
                         <div class="card-body">
                             <h4 class="card-title text-center">
                                 <i class="fas fa-video"></i> Video Analysis
@@ -136,28 +143,29 @@
                 </div>
                 
                 <div class="col-md-6">
-                    <div class="card bg-transparent border-0">
+                    <div class="card">
                         <div class="card-body">
                             <h4 class="card-title text-center">
                                 <i class="fas fa-microphone"></i> Audio/Text Analysis
                             </h4>
+                            <!-- In the analysis results section -->
                             <div class="text-center mt-3">
                                 <p>Emotion: 
                                     <span class="badge 
-                                        {% if session.audio_emotion and session.audio_emotion.lower() == 'happy' %}happy
-                                        {% elif session.audio_emotion and session.audio_emotion.lower() == 'neutral' %}neutral
-                                        {% elif session.audio_emotion and session.audio_emotion.lower() == 'sad' %}sad
-                                        {% elif session.audio_emotion and session.audio_emotion.lower() == 'angry' %}angry
-                                        {% elif session.audio_emotion and session.audio_emotion.lower() == 'fear' %}fear
-                                        {% elif session.audio_emotion and session.audio_emotion.lower() == 'disgust' %}disgust
-                                        {% elif session.audio_emotion and session.audio_emotion.lower() == 'surprise' %}surprise
+                                        {% if session.video_emotion and session.video_emotion.lower() == 'happy' %}happy
+                                        {% elif session.video_emotion and session.video_emotion.lower() == 'neutral' %}neutral
+                                        {% elif session.video_emotion and session.video_emotion.lower() == 'sad' %}sad
+                                        {% elif session.video_emotion and session.video_emotion.lower() == 'angry' %}angry
+                                        {% elif session.video_emotion and session.video_emotion.lower() == 'fear' %}fear
+                                        {% elif session.video_emotion and session.video_emotion.lower() == 'disgust' %}disgust
+                                        {% elif session.video_emotion and session.video_emotion.lower() == 'surprise' %}surprise
                                         {% else %}secondary{% endif %}">
-                                        {{ session.audio_emotion if session.audio_emotion else 'Unknown' }}
+                                        {{ session.video_emotion }}
                                     </span>
                                 </p>
                                 <p>Confidence: 
                                     <span class="badge bg-info">
-                                        {{ "%.2f"|format(session.audio_score|float) if session.audio_score is not none else 'N/A' }}
+                                        {{ "%.2f"|format(session.video_score|float) if session.video_score is not none else 'N/A' }}
                                     </span>
                                 </p>
                             </div>

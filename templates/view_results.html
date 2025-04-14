@@ -59,6 +59,12 @@
             font-size: 0.9em;
             color: #ccc;
         }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .table {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +96,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- In the table body -->
                     {% for result in results %}
                     <tr>
                         <td>{{ result.timestamp }}</td>
@@ -101,9 +108,11 @@
                             </span>
                         </td> 
                         <td>
-                            {% set sentiment = (result.overall_sentiment or 'unknown')|lower %}
+                            {% set sentiment = result.overall_sentiment.lower() if result.overall_sentiment else 'unknown' %}
                             <span class="sentiment-badge {{ sentiment }}">
-                                {{ result.overall_sentiment or 'Unknown' }}
+                                {{ result.overall_sentiment }}
+                                <br>
+                                <small>(Video: {{ result.video_emotion }}, Audio: {{ result.audio_emotion }})</small>
                             </span>
                         </td> 
                         <td class="description-cell">{{ result.description }}</td>
