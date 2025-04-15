@@ -8,36 +8,189 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Amazon Ember', sans-serif;
+            transition: background 0.5s, color 0.5s;
+        }
+        
+        body.light-theme {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            color: #111;
+        }
+        
+        body.dark-theme {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: white;
         }
-        .container {
-            margin-top: 50px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+        
+        .navbar-box {
+            border-radius: 20px;
+            padding: 10px 25px;
+            margin: 20px auto;
+            width: 95%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            animation: fadeSlide 1s ease;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
+        
+        .navbar-box::before {
+            content: "";
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            z-index: -1;
+            background: linear-gradient(60deg, #9c27b0, #ff4081, #00e5ff, #7c4dff);
+            background-size: 300% 300%;
+            animation: animated-border 5s ease infinite;
+            filter: blur(10px);
+        }
+        
+        @keyframes animated-border {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .navbar .navbar-brand h2,
+        .navbar .nav-link {
+            color: white !important;
+        }
+        
+        .light-theme .navbar .navbar-brand h2,
+        .light-theme .navbar .nav-link {
+            color: #111 !important;
+        }
+        
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.2);
+        }
+        
+        .light-theme .theme-toggle {
+            color: #111;
+        }
+        
+        .logout-box {
+            background: linear-gradient(to right, #ff6ec4, #7873f5);
+            padding: 8px 20px;
+            border-radius: 30px;
+            margin-left: 15px;
+            box-shadow: 0 0 10px #ff6ec4;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .logout-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #7873f5;
+        }
+        
+        .logout-box a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .light-theme .logout-box {
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            box-shadow: 0 0 10px #ff758c;
+        }
+        
+        .light-theme .logout-box a {
+            color: #111;
+        }
+        
+        .container-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 20px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .light-theme .container-box {
+            background: rgba(0, 0, 0, 0.05);
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Table styles with theme support */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
         table {
             width: 100%;
             text-align: center;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
+            overflow: hidden;
         }
+        
+        .light-theme table {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
         th, td {
             padding: 12px;
             color: white;
             vertical-align: middle;
+            border-color: rgba(255, 255, 255, 0.1);
         }
+        
+        .light-theme th, 
+        .light-theme td {
+            color: #111;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
         th {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.3);
         }
+        
+        .light-theme th {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        tr {
+            transition: background-color 0.3s;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .light-theme tr:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
         .sentiment-badge {
             padding: 5px 10px;
             border-radius: 20px;
             font-weight: 500;
+            display: inline-block;
+            margin: 2px 0;
         }
+        
         .happy { background-color: #28a745; }
         .neutral { background-color: #6c757d; }
         .sad { background-color: #dc3545; }
@@ -46,41 +199,60 @@
         .disgust { background-color: #20c997; }
         .surprise { background-color: #ffc107; color: #000; }
         .unknown { background-color: #6c757d; }
+        
         .description-cell {
             max-width: 300px;
             white-space: normal;
             word-wrap: break-word;
             text-align: left;
         }
-        .navbar {
-            background: rgba(0, 0, 0, 0.8);
-        }
+        
         .session-duration {
             font-size: 0.9em;
             color: #ccc;
         }
-        .table-responsive {
-            overflow-x: auto;
+        
+        .light-theme .session-duration {
+            color: #666;
         }
-        .table {
-            margin-bottom: 0;
+        
+        .alert {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+        }
+        
+        .light-theme .alert {
+            background: rgba(0, 0, 0, 0.05);
+            color: #111;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #9c27b0, #e91e63);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #e91e63, #9c27b0);
         }
     </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#"><h2>Multimodal Analysis</h2></a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a href="{{ url_for('base') }}" class="nav-link">Dashboard</a></li>
-                    <li class="nav-item"><a href="{{ url_for('logout') }}" class="nav-link">Logout</a></li>
-                </ul>
+<body class="dark-theme">
+    <div class="navbar-box">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#"><h2>Multimodal Analysis</h2></a>
+                <div class="d-flex align-items-center ms-auto">
+                    <button class="theme-toggle" onclick="toggleTheme()">🌙 / ☀️</button>
+                    <div class="logout-box">
+                        <a href="{{ url_for('logout') }}">Logout</a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </div>
 
-    <div class="container">
+    <div class="container-box" style="max-width: 1200px; margin: 20px auto;">
         <h1 class="text-center mb-4">Saved Emotion Analysis Results</h1>
         
         {% if results %}
@@ -96,7 +268,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- In the table body -->
                     {% for result in results %}
                     <tr>
                         <td>{{ result.timestamp }}</td>
@@ -134,5 +305,24 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('dark-theme')) {
+                body.classList.replace('dark-theme', 'light-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.replace('light-theme', 'dark-theme');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // Apply saved theme on load
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.add(savedTheme + '-theme');
+        })();
+    </script>
 </body>
 </html>

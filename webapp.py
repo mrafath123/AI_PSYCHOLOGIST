@@ -660,13 +660,13 @@ def session_details(session_id):
 
 def get_description(overall_sentiment, overall_score):
     descriptions = {
-        "happy": "Keep smiling! Happiness looks great on you.",
-        "neutral": "You seem calm and balanced. Stay mindful.",
-        "sad": "It's okay to feel down sometimes. Take care of yourself.",
-        "angry": "Take a deep breath. Try to relax and clear your mind.",
-        "fear": "Fear is natural. Stay calm and face your worries step by step.",
-        "disgust": "Not everything is pleasant, but stay positive!",
-        "surprise": "Exciting moments can be thrilling! Enjoy the surprises in life."
+        "happy": "Your current emotional state reflects happiness and positivity. Continue engaging in activities and connections that bring you joy. Happiness is not just a feeling, but a powerful influence on overall well-being.",
+        "neutral": "You appear emotionally stable and balanced at this moment. Maintaining mindfulness and emotional awareness can help you navigate daily challenges with resilience and clarity.",
+        "sad": "You may be experiencing sadness or emotional distress. It’s important to acknowledge your feelings and take time to care for your emotional health. If this feeling persists or deepens, consider reaching out to a mental health professional for support and guidance.",
+        "angry": "You may be feeling anger or frustration. Try to pause and practice deep breathing or mindfulness techniques to regain control and clarity. If anger becomes overwhelming or frequent, seeking professional help can provide effective coping strategies.",
+        "fear": "Your emotional state may be influenced by fear or anxiety. These are valid and natural responses to stress or uncertainty. If fear starts interfering with daily life, it might be helpful to consult a mental health professional for guidance and reassurance.",
+        "disgust": "You may be reacting to something unpleasant or uncomfortable. While it's normal to experience disgust, maintaining a positive outlook and focusing on constructive thoughts can help shift your perspective. If recurring negative emotions affect your mood, professional counseling might be beneficial.",
+        "surprise": "You’re experiencing surprise or unexpected excitement. Embrace the spontaneity and allow yourself to explore the moment. Positive surprises can be invigorating, while negative ones can be unsettling—so take time to process and respond thoughtfully."
     }
 
     description = descriptions.get(overall_sentiment.lower(), "Stay mindful and positive.")
