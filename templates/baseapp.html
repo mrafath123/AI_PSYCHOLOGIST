@@ -118,6 +118,21 @@
     .light-theme .logout-box a {
       color: #111;
     }
+    .developed-by {
+      position: fixed;
+      bottom: 10px;
+      right: 20px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      z-index: 999;
+      font-style: italic;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .developed-by {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
     
     .container-box {
       background: rgba(255, 255, 255, 0.08);
@@ -197,5 +212,8 @@
       document.body.classList.add(savedTheme + '-theme');
     })();
   </script>
+  <div class="developed-by">
+    developed by <strong>neural_nexus@kit</strong>
+  </div>  
 </body>
 </html>
